@@ -1,0 +1,12 @@
+{% extends "layout.html" %}
+
+{% block contenido %}
+<div class="col-md-12">
+	<div class="alert alert-primary">
+		<h2>Bienvenido, {{ session['user_nombre'] }}</h2>
+		<p>Estás logueado</p>
+	</div>
+</div>
+<div class="col-md-12">
+</div>
+{% endblock %}
