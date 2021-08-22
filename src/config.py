@@ -10,3 +10,8 @@ SQLALCHEMY_DATABASE_URI = 'mysql://root:root@localhost/pythonflaskcontactos'
 # SQLALCHEMY_DATABASE_URI = 'mysql://root:root@localhost/pythonflaskcontactos'.format(
 #     PWD)
 SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+MYSQL_HOST = 'localhost'
+MYSQL_USER = 'root'
+MYSQL_PASS = 'root'
+MYSQL_DB = 'pythonflaskcontactos'
