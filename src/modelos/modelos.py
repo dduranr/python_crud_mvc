@@ -40,6 +40,10 @@ from sqlalchemy import Column, Integer, String, DateTime
 Base = declarative_base()
 engine = create_engine(SQLALCHEMY_DATABASE_URI)
 
+# Para establecer conexión entre "sqlalchemy import create_engine" y los modelos se hace mediante sesiones. A través de esta sesión se va a gestionar las BD
+Session = sessionmaker(engine)
+sessionDB = Session()
+
 
 
 class User(Base):
@@ -54,6 +58,15 @@ class User(Base):
 
     def __str__(self):
         return self.email
+
+
+    # SIGO CON
+    # SIGO CON
+    # SIGO CON
+    #           1. regresar al controlador y modificar todas las queries de los contactos, que ahora tienen la versión SQL crudo, sin ORM
+    #           2. https://j2logo.com/tutorial-flask-leccion-5-base-de-datos-con-flask-sqlalchemy/
+    #                   Implementar en mi clase User los métodos que se ven en ese link
+    #           3. Sique quedando pendiente cómo lograr separar controladores.py en varios archivos, y lo mismo para modelos.py
 
 
 

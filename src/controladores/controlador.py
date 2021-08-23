@@ -18,20 +18,8 @@ from config import *
 from flask import Flask, render_template, request, redirect, url_for, flash, session
 from flask_mysqldb import MySQL
 from datetime import datetime
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy import Column, Integer, String, DateTime
 import bcrypt
 import sys
-
-Base = declarative_base()
-engine = create_engine(SQLALCHEMY_DATABASE_URI)
-
-# Para establecer conexión entre "sqlalchemy import create_engine" y los modelos se hace mediante sesiones. A través de esta sesión se va a gestionar las BD
-Session = sessionmaker(engine)
-sessionDB = Session()
-
 
 
 # Semilla para encriptamiento de contraseña
@@ -226,13 +214,14 @@ def user_update(id):
             email = request.form['email']
             contrasena = request.form['contrasena']
             contrasena_encode = contrasena.encode('utf-8')
-            # contrasena_crypt = bcrypt.hashpw(contrasena_encode, semilla)
+            contrasena_crypt = bcrypt.hashpw(contrasena_encode, semilla)
 
             sessionDB.query(User).filter(User.id == id).update({
                 User.nombre: nombre,
                 User.email: email,
-                User.contrasena: contrasena_encode
+                User.contrasena: contrasena_crypt
             })
+            sessionDB.commit()
 
             flash('Usuario actualizado', 'success')
             return redirect(url_for('users'))
