@@ -31,7 +31,7 @@
                     </div>
                     <div class="form-group col-md-12">
                         <label for="contrasena">Contraseña</label>
-                        <input type="password" class="form-control" id="contrasena" name="contrasena" value="b">
+                        <input type="password" class="form-control" id="contrasena" name="contrasena" value="abc">
                     </div>
                 </div>
                 <br>
@@ -50,11 +50,11 @@
                 <tbody>
                     {% for user in users %}
                         <tr>
-                            <td>{{ user.0 }}</td>
-                            <td>{{ user.1 }}</td>
-                            <td>{{ user.2 }}</td>
-                            <td><a class="btn btn-success" href="/user_update/{{ user.0 }}">Editar</a></td>
-                            <td><a class="btn btn-danger btn-delete" href="/user_delete/{{ user.0 }}">Borrar</a></td>
+                            <td>{{ user['id'] }}</td>
+                            <td>{{ user['nombre'] }}</td>
+                            <td>{{ user['email'] }}</td>
+                            <td><a class="btn btn-success" href="/user_update/{{ user['id'] }}">Editar</a></td>
+                            <td><a class="btn btn-danger btn-delete" href="/user_delete/{{ user['id'] }}">Borrar</a></td>
                         </tr>
                     {% endfor %}
                 </tbody>

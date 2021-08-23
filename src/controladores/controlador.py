@@ -26,27 +26,19 @@ import bcrypt
 import sys
 
 Base = declarative_base()
-
 engine = create_engine(SQLALCHEMY_DATABASE_URI)
 
+# Para establecer conexión entre "sqlalchemy import create_engine" y los modelos se hace mediante sesiones. A través de esta sesión se va a gestionar las BD
+Session = sessionmaker(engine)
+sessionDB = Session()
 
 
 
-# Base.metadata.drop_all(engine) Se eliminan las tablas de la BD
-# Base.metadata.create_all(engine) Se generans las tablas de la BD
+# Semilla para encriptamiento de contraseña
+semilla = bcrypt.gensalt()
 
-class User(Base):
-    __tablename__ = 'users'
-
-    id = Column(Integer(), primary_key=True)
-    nombre = Column(String(255), nullable=False)
-    email = Column(String(255), nullable=False, unique=True)
-    contrasena = Column(String(255), nullable=False)
-    created_at = Column(DateTime(255), default=datetime.now())
-    updated_at = Column(DateTime(255), default=datetime.now())
-
-    def __str__(self):
-        return self.email
+# Sesión
+app.secret_key = 'mysecretkey'
 
 
 # MySQL
@@ -58,28 +50,13 @@ mysql = MySQL(app)
 
 
 
-# Semilla para encriptamiento de contraseña
-semilla = bcrypt.gensalt()
-
-# Sesión
-app.secret_key = 'mysecretkey'
-
+from modelos.modelos import *
 
 
 # HOME
 # ------------------------------------------------------------
 @app.route('/')
 def index():
-
-    # Para establecer conexión entre "sqlalchemy import create_engine" y los modelos se hace mediante sesiones. A través de esta sesión se va a gestionar las BD
-    Session = sessionmaker(engine)
-    session = Session()
-
-    user1 = User(nombre='Tolomeo', email='tolomeo@gmail.com', contrasena='abcdef', created_at='2021-08-21 00:00:01', updated_at='2021-08-21 00:00:01')
-
-    session.add(user1)
-    session.commit()
-
     return render_template('index.html')
 
 
@@ -112,20 +89,24 @@ def acceso():
         contrasena = request.form['contrasena']
         contrasena_encode = contrasena.encode('utf-8')
 
-        cursor = mysql.connection.cursor()
-        cursor.execute(f"SELECT * FROM users WHERE email = '{email}'")
-        user = cursor.fetchone()
+        usuario = sessionDB.query(User).filter( # User es la clase User
+            User.email == email
+        ).first()
 
-        bd_contrasena = user[3]
-        bd_contrasena = bd_contrasena.encode('utf-8')
+        if usuario:
+            bd_contrasena = usuario.contrasena
+            bd_contrasena = bd_contrasena.encode('utf-8')
 
-        # Si en la BD se guarda un texto cualquiera y no un hash (p.e. abc), el navegador devuelve: ValueError: Invalid salt
-        if(bcrypt.checkpw(contrasena_encode, bd_contrasena)):
-            session['user_id'] = user[0]
-            session['user_nombre'] = user[1]
-            session['user_email'] = email
-            return redirect(url_for('welcome'))
-        else:
+            # Si en la BD se guarda un texto cualquiera y no un hash (p.e. abc), el navegador devuelve: ValueError: Invalid salt
+            if(bcrypt.checkpw(contrasena_encode, bd_contrasena)):
+                session['user_id'] = usuario.id
+                session['user_nombre'] = usuario.nombre
+                session['user_email'] = usuario.email
+                return redirect(url_for('welcome'))
+            else:
+                flash('Usuario/contraseña incorrectos', 'danger')
+                return redirect(url_for('login'))
+        else :
             flash('Usuario/contraseña incorrectos', 'danger')
             return redirect(url_for('login'))
 
@@ -179,10 +160,8 @@ def logout():
 @app.route('/users')
 def users():
     try:
-        cursor = mysql.connection.cursor()
-        cursor.execute('SELECT * FROM users')
-        users = cursor.fetchall()
-        return render_template('users/index.html', users=users)
+        usuarios = sessionDB.query(User).all()
+        return render_template('users/index.html', users=usuarios)
 
     except Exception as e:
         error = "Excepción general: " + str(e.__class__)
@@ -208,16 +187,19 @@ def user_post():
             contrasena = request.form['contrasena']
             contrasena_encode = contrasena.encode('utf-8')
             contrasena_crypt = bcrypt.hashpw(contrasena_encode, semilla)
-            contrasena_crypt_encode = contrasena_crypt.encode('utf-8')
 
-            print("XXXXXXXXXXXXXXXXXXX HASH: ", contrasena_crypt_encode)
+            # Checamos si ya existe el email en la BD
+            userExistente = sessionDB.query(User).filter(User.email == email).first()
+            if userExistente:
+                flash('Imposible crear usuario, pues '+email+' ya existe como usuario en base de datos', 'danger')
+                return redirect(url_for('users'))
+            else :
+                nuevoUser = User(nombre=nombre, email=email, contrasena=contrasena_crypt, created_at=ahora)
+                sessionDB.add(nuevoUser)
+                sessionDB.commit()
 
-            cursor = mysql.connection.cursor()
-            cursor.execute(
-                f"INSERT INTO users (nombre, email, contrasena, created_at) VALUES ('{nombre}', '{email}', '{contrasena_crypt_encode}', '{ahora}')")
-            mysql.connection.commit()
-            flash('Usuario agregado', 'success')
-            return redirect(url_for('users'))
+                flash('Usuario agregado', 'success')
+                return redirect(url_for('users'))
 
     except Exception as e:
         error = "Excepción general: " + str(e.__class__)
@@ -244,13 +226,14 @@ def user_update(id):
             email = request.form['email']
             contrasena = request.form['contrasena']
             contrasena_encode = contrasena.encode('utf-8')
-            contrasena_crypt = bcrypt.hashpw(contrasena_encode, semilla)
+            # contrasena_crypt = bcrypt.hashpw(contrasena_encode, semilla)
 
-            # Los f-strings no funcionan bien al armar esta query con un hash de contraseña, así que uso el código porcentaje
-            cursor = mysql.connection.cursor()
-            cursor.execute('UPDATE users SET nombre = %s, email = %s, contrasena = %s WHERE id = %s',
-                           (nombre, email, contrasena_crypt, id))
-            mysql.connection.commit()
+            sessionDB.query(User).filter(User.id == id).update({
+                User.nombre: nombre,
+                User.email: email,
+                User.contrasena: contrasena_encode
+            })
+
             flash('Usuario actualizado', 'success')
             return redirect(url_for('users'))
 
@@ -269,9 +252,10 @@ def user_update(id):
 @app.route('/user_delete/<id>')
 def user_delete(id):
     try:
-        cursor = mysql.connection.cursor()
-        cursor.execute(f'DELETE FROM users WHERE id={id}')
-        mysql.connection.commit()
+
+        sessionDB.query(User).filter(User.id == id).delete()
+        sessionDB.commit()
+
         flash('Usuario eliminado', 'success')
         return redirect(url_for('users'))
 
