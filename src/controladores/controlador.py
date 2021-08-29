@@ -205,22 +205,33 @@ def user_post():
 def user_update(id):
     try:
         if (request.method == 'GET'):
-            cursor = mysql.connection.cursor()
-            cursor.execute(f"SELECT * FROM users WHERE id = {id}")
-            user = cursor.fetchone()
-            return render_template('users/update.html', user=user)
+            user = sessionDB.query(User).filter( # User es la clase User
+                User.id == id
+            ).first()
+
+            if user:
+                return render_template('users/update.html', user=user)
+            else :
+                flash('Imposible encontrar al usuario', 'danger')
+                return redirect(url_for('users'))
         elif (request.method == 'POST'):
             nombre = request.form['nombre']
             email = request.form['email']
             contrasena = request.form['contrasena']
-            contrasena_encode = contrasena.encode('utf-8')
-            contrasena_crypt = bcrypt.hashpw(contrasena_encode, semilla)
 
-            sessionDB.query(User).filter(User.id == id).update({
-                User.nombre: nombre,
-                User.email: email,
-                User.contrasena: contrasena_crypt
-            })
+            if(len(contrasena) > 0):
+                contrasena_encode = contrasena.encode('utf-8')
+                contrasena_crypt = bcrypt.hashpw(contrasena_encode, semilla)
+                sessionDB.query(User).filter(User.id == id).update({
+                    User.nombre: nombre,
+                    User.email: email,
+                    User.contrasena: contrasena_crypt
+                })
+            else:
+                sessionDB.query(User).filter(User.id == id).update({
+                    User.nombre: nombre,
+                    User.email: email
+                })
             sessionDB.commit()
 
             flash('Usuario actualizado', 'success')
@@ -265,11 +276,8 @@ def user_delete(id):
 @app.route('/contactos')
 def contactos():
     try:
-        cursor = mysql.connection.cursor()
-        cursor.execute('SELECT * FROM contactos')
-        contactos = cursor.fetchall()
-        print(contactos)
-        return render_template('contactos.html', contactos=contactos)
+        contactos = sessionDB.query(Contacto).all()
+        return render_template('contactos/index.html', contactos=contactos)
 
     except Exception as e:
         error = "Excepción general: " + str(e.__class__)
@@ -287,16 +295,25 @@ def contactos():
 def contacto_post():
     try:
         if request.method == 'POST':
+            now = datetime.now()
+            ahora = now.strftime("%Y-%m-%d %H:%M:%S")
+
             nombre = request.form['nombre']
             telefono = request.form['telefono']
             email = request.form['email']
 
-            cursor = mysql.connection.cursor()
-            cursor.execute(
-                f"INSERT INTO contactos (nombre, telefono, email) VALUES ('{nombre}', '{telefono}', '{email}')")
-            mysql.connection.commit()
-            flash('Contacto agregado', 'success')
-            return redirect(url_for('contactos'))
+            # Checamos si ya existe el email en la BD
+            contactoExistente = sessionDB.query(Contacto).filter(Contacto.email == email).first()
+            if contactoExistente:
+                flash('Imposible crear contacto, pues '+email+' ya existe como contacto en base de datos', 'danger')
+                return redirect(url_for('contactos'))
+            else :
+                nuevoContacto = Contacto(nombre=nombre, telefono=telefono, email=email, created_at=ahora)
+                sessionDB.add(nuevoContacto)
+                sessionDB.commit()
+
+                flash('Contacto agregado', 'success')
+                return redirect(url_for('contactos'))
 
     except Exception as e:
         error = "Excepción general: " + str(e.__class__)
@@ -309,36 +326,31 @@ def contacto_post():
         return render_template('error.html', error="ValueError: "+error)
 
 
-@app.route('/contacto_edit/<id>', methods=['GET'])
-def contacto_edit(id):
-    try:
-        cursor = mysql.connection.cursor()
-        cursor.execute(f"SELECT * FROM contactos WHERE id = {id}")
-        contacto = cursor.fetchall()
-        return render_template('editar_contacto.html', contacto=contacto[0])
-
-    except Exception as e:
-        error = "Excepción general: " + str(e.__class__)
-        return render_template('error.html', error=error)
-    except TypeError as e:
-        error = "Excepción general: " + str(e)
-        return render_template('error.html', error="TypeError: "+error)
-    except ValueError as e:
-        error = "Excepción general: " + str(e)
-        return render_template('error.html', error="ValueError: "+error)
-
-
-@app.route('/contacto_update/<id>', methods=['POST'])
+@app.route('/contacto_update/<id>', methods=['GET', 'POST'])
 def contacto_update(id):
     try:
-        if request.method == 'POST':
+        if (request.method == 'GET'):
+            contacto = sessionDB.query(Contacto).filter( # Contacto es la clase Contacto
+                Contacto.id == id
+            ).first()
+
+            if contacto:
+                return render_template('contactos/update.html', contacto=contacto)
+            else :
+                flash('Imposible encontrar el contacto', 'danger')
+                return redirect(url_for('contactos'))
+        elif (request.method == 'POST'):
             nombre = request.form['nombre']
             telefono = request.form['telefono']
             email = request.form['email']
-            cursor = mysql.connection.cursor()
-            cursor.execute(
-                f"UPDATE contactos SET nombre = '{nombre}', telefono = '{telefono}', email = '{email}' WHERE id = {id}")
-            mysql.connection.commit()
+
+            sessionDB.query(Contacto).filter(Contacto.id == id).update({
+                Contacto.nombre: nombre,
+                Contacto.email: email,
+                Contacto.telefono: telefono
+            })
+            sessionDB.commit()
+
             flash('Contacto actualizado', 'success')
             return redirect(url_for('contactos'))
 
@@ -353,12 +365,14 @@ def contacto_update(id):
         return render_template('error.html', error="ValueError: "+error)
 
 
+
 @app.route('/contacto_delete/<id>')
 def contacto_delete(id):
     try:
-        cursor = mysql.connection.cursor()
-        cursor.execute(f'DELETE FROM contactos WHERE id={id}')
-        mysql.connection.commit()
+
+        sessionDB.query(Contacto).filter(Contacto.id == id).delete()
+        sessionDB.commit()
+
         flash('Contacto eliminado', 'success')
         return redirect(url_for('contactos'))
 

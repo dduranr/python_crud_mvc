@@ -54,30 +54,22 @@ class User(Base):
     email = Column(String(255), nullable=False, unique=True)
     contrasena = Column(String(255), nullable=False)
     created_at = Column(DateTime(255), default=datetime.now())
-    updated_at = Column(DateTime(255), default=datetime.now())
+    updated_at = Column(DateTime(255), default=datetime.now(), onupdate=datetime.now())
 
     def __str__(self):
         return self.email
 
 
-    # SIGO CON
-    # SIGO CON
-    # SIGO CON
-    #           1. regresar al controlador y modificar todas las queries de los contactos, que ahora tienen la versión SQL crudo, sin ORM
-    #           2. https://j2logo.com/tutorial-flask-leccion-5-base-de-datos-con-flask-sqlalchemy/
-    #                   Implementar en mi clase User los métodos que se ven en ese link
-    #           3. Sique quedando pendiente cómo lograr separar controladores.py en varios archivos, y lo mismo para modelos.py
 
+class Contacto(Base):
+    __tablename__ = 'contactos'
+    id = Column(Integer(), primary_key=True)
+    nombre = Column(String(255), nullable=False)
+    telefono = Column(String(255), nullable=False)
+    email = Column(String(255), nullable=False)
+    created_at = Column(DateTime(255), default=datetime.now())
+    updated_at = Column(DateTime(255), default=datetime.now(), onupdate=datetime.now())
 
-
-
-
-# class Contactos(db.Model):
-#     __tablename__ = 'contactos'
-#     id = db.Column(db.Integer(), primary_key=True)
-#     nombre = db.Column(db.String(255), nullable=False)
-#     telefono = db.Column(db.String(255), nullable=False)
-#     email = db.Column(db.String(255), nullable=False)
-#     created_at = db.Column(db.DateTime(), default=datetime.utcnow)
-#     updated_at = db.Column(db.DateTime(), default=datetime.utcnow, onupdate=datetime.utcnow)
+    def __str__(self):
+        return self.email
 

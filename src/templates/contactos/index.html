@@ -51,12 +51,12 @@
                 <tbody>
                     {% for contacto in contactos %}
                         <tr>
-                            <td>{{ contacto.0 }}</td>
-                            <td>{{ contacto.1 }}</td>
-                            <td>{{ contacto.2 }}</td>
-                            <td>{{ contacto.3 }}</td>
-                            <td><a class="btn btn-success" href="/contacto_update/{{ contacto.0 }}">Editar</a></td>
-                            <td><a class="btn btn-danger btn-delete" href="/contacto_delete/{{ contacto.0 }}">Borrar</a></td>
+                            <td>{{ contacto['id'] }}</td>
+                            <td>{{ contacto['nombre'] }}</td>
+                            <td>{{ contacto['telefono'] }}</td>
+                            <td>{{ contacto['email'] }}</td>
+                            <td><a class="btn btn-success" href="/contacto_update/{{ contacto['id'] }}">Editar</a></td>
+                            <td><a class="btn btn-danger btn-delete" href="/contacto_delete/{{ contacto['id'] }}">Borrar</a></td>
                         </tr>
                     {% endfor %}
                 </tbody>

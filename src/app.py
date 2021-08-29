@@ -7,6 +7,11 @@ app = Flask(__name__)
 # Importamos el controlador después de declarar la variable "app", ya que el controlador lo usa para las rutas
 from controladores.controlador import *
 
+# En este Github https://github.com/salimane/flask-mvc/blob/master/project/__init__.py se ve cómo armaron un MVC, y en vez de llamar cada controlador por separado, se jalan todo de una vez:
+# from project.controllers import *
+
+
+
 # Si éste es el archivo que arranca a la app, entonces la ejecutamos
 #   1. Declaramos el puerto a usars
 #   2. Debug true para que se actualice el front ante cualquier cambio
