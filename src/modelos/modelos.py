@@ -54,7 +54,33 @@ class User(Base):
     email = Column(String(255), nullable=False, unique=True)
     contrasena = Column(String(255), nullable=False)
     created_at = Column(DateTime(255), default=datetime.now())
-    updated_at = Column(DateTime(255), default=datetime.now(), onupdate=datetime.now())
+    updated_at = Column(DateTime(255), onupdate=datetime.now())
+
+    def getById(id):
+        return sessionDB.query(User).filter(
+            User.id == id
+        ).first()
+
+    def getByEmail(email):
+        return sessionDB.query(User).filter(
+            User.email == email
+        ).first()
+
+    def guardar(self):
+        if not self.id:
+            sessionDB.add(self)
+        sessionDB.commit()
+
+    def actualizar(id, datos):
+        sessionDB.query(User).filter(User.id == id).update({
+            User.nombre: datos['nombre'],
+            User.email: datos['email'],
+            User.contrasena: datos['contrasena']
+        })
+
+
+
+
 
     def __str__(self):
         return self.email
@@ -68,8 +94,24 @@ class Contacto(Base):
     telefono = Column(String(255), nullable=False)
     email = Column(String(255), nullable=False)
     created_at = Column(DateTime(255), default=datetime.now())
-    updated_at = Column(DateTime(255), default=datetime.now(), onupdate=datetime.now())
+    updated_at = Column(DateTime(255), onupdate=datetime.now())
+
+    def getById(id):
+        return sessionDB.query(Contacto).filter(
+            Contacto.id == id
+        ).first()
+
+    def getByEmail(email):
+        return sessionDB.query(Contacto).filter(
+            Contacto.email == email
+        ).first()
+
+    def guardar(self):
+        if not self.id:
+            sessionDB.add(self)
+        sessionDB.commit()
 
     def __str__(self):
         return self.email
+
 

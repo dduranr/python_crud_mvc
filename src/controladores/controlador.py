@@ -77,9 +77,7 @@ def acceso():
         contrasena = request.form['contrasena']
         contrasena_encode = contrasena.encode('utf-8')
 
-        usuario = sessionDB.query(User).filter( # User es la clase User
-            User.email == email
-        ).first()
+        usuario = User.getByEmail(email)
 
         if usuario:
             bd_contrasena = usuario.contrasena
@@ -176,15 +174,14 @@ def user_post():
             contrasena_encode = contrasena.encode('utf-8')
             contrasena_crypt = bcrypt.hashpw(contrasena_encode, semilla)
 
-            # Checamos si ya existe el email en la BD
-            userExistente = sessionDB.query(User).filter(User.email == email).first()
+            userExistente = User.getByEmail(email)
+
             if userExistente:
                 flash('Imposible crear usuario, pues '+email+' ya existe como usuario en base de datos', 'danger')
                 return redirect(url_for('users'))
             else :
-                nuevoUser = User(nombre=nombre, email=email, contrasena=contrasena_crypt, created_at=ahora)
-                sessionDB.add(nuevoUser)
-                sessionDB.commit()
+                usuario = User(nombre=nombre, email=email, contrasena=contrasena_crypt)
+                usuario.guardar()
 
                 flash('Usuario agregado', 'success')
                 return redirect(url_for('users'))
@@ -219,20 +216,28 @@ def user_update(id):
             email = request.form['email']
             contrasena = request.form['contrasena']
 
-            if(len(contrasena) > 0):
-                contrasena_encode = contrasena.encode('utf-8')
-                contrasena_crypt = bcrypt.hashpw(contrasena_encode, semilla)
-                sessionDB.query(User).filter(User.id == id).update({
-                    User.nombre: nombre,
-                    User.email: email,
-                    User.contrasena: contrasena_crypt
-                })
-            else:
-                sessionDB.query(User).filter(User.id == id).update({
-                    User.nombre: nombre,
-                    User.email: email
-                })
-            sessionDB.commit()
+            userExistente = User.getByEmail(email)
+            print(userExistente.contrasena)
+
+            if not userExistente:
+                flash('Imposible actualizar user, pues '+email+' no existe como user en base de datos', 'danger')
+                return redirect(url_for('users'))
+            else :
+                if(len(contrasena) > 0):
+                    contrasena_encode = contrasena.encode('utf-8')
+                    contrasena_crypt = bcrypt.hashpw(contrasena_encode, semilla)
+
+                    sessionDB.query(User).filter(User.id == id).update({
+                        User.nombre: nombre,
+                        User.email: email,
+                        User.contrasena: contrasena_crypt
+                    })
+                else:
+                    sessionDB.query(User).filter(User.id == id).update({
+                        User.nombre: nombre,
+                        User.email: email
+                    })
+                sessionDB.commit()
 
             flash('Usuario actualizado', 'success')
             return redirect(url_for('users'))
@@ -252,9 +257,14 @@ def user_update(id):
 @app.route('/user_delete/<id>')
 def user_delete(id):
     try:
+        userExistente = User.getById(email)
 
-        sessionDB.query(User).filter(User.id == id).delete()
-        sessionDB.commit()
+        if not userExistente:
+            flash('Imposible eliminar user, pues '+email+' no existe como user en base de datos', 'danger')
+            return redirect(url_for('users'))
+        else :
+            sessionDB.query(User).filter(User.id == id).delete()
+            sessionDB.commit()
 
         flash('Usuario eliminado', 'success')
         return redirect(url_for('users'))
@@ -302,15 +312,14 @@ def contacto_post():
             telefono = request.form['telefono']
             email = request.form['email']
 
-            # Checamos si ya existe el email en la BD
-            contactoExistente = sessionDB.query(Contacto).filter(Contacto.email == email).first()
+            contactoExistente = Contacto.getByEmail(email)
+
             if contactoExistente:
                 flash('Imposible crear contacto, pues '+email+' ya existe como contacto en base de datos', 'danger')
                 return redirect(url_for('contactos'))
             else :
-                nuevoContacto = Contacto(nombre=nombre, telefono=telefono, email=email, created_at=ahora)
-                sessionDB.add(nuevoContacto)
-                sessionDB.commit()
+                contacto = Contacto(nombre=nombre, telefono=telefono, email=email)
+                contacto.guardar()
 
                 flash('Contacto agregado', 'success')
                 return redirect(url_for('contactos'))
@@ -344,12 +353,18 @@ def contacto_update(id):
             telefono = request.form['telefono']
             email = request.form['email']
 
-            sessionDB.query(Contacto).filter(Contacto.id == id).update({
-                Contacto.nombre: nombre,
-                Contacto.email: email,
-                Contacto.telefono: telefono
-            })
-            sessionDB.commit()
+            contactoExistente = Contacto.getByEmail(email)
+
+            if not contactoExistente:
+                flash('Imposible actualizar contacto, pues '+email+' no existe como contacto en base de datos', 'danger')
+                return redirect(url_for('contactos'))
+            else :
+                sessionDB.query(Contacto).filter(Contacto.id == id).update({
+                    Contacto.nombre: nombre,
+                    Contacto.email: email,
+                    Contacto.telefono: telefono
+                })
+                sessionDB.commit()
 
             flash('Contacto actualizado', 'success')
             return redirect(url_for('contactos'))
@@ -369,9 +384,14 @@ def contacto_update(id):
 @app.route('/contacto_delete/<id>')
 def contacto_delete(id):
     try:
+        contactoExistente = Contacto.getById(email)
 
-        sessionDB.query(Contacto).filter(Contacto.id == id).delete()
-        sessionDB.commit()
+        if not contactoExistente:
+            flash('Imposible eliminar contacto, pues '+email+' no existe como contacto en base de datos', 'danger')
+            return redirect(url_for('contactos'))
+        else :
+            sessionDB.query(Contacto).filter(Contacto.id == id).delete()
+            sessionDB.commit()
 
         flash('Contacto eliminado', 'success')
         return redirect(url_for('contactos'))
