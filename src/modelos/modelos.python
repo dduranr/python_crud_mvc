@@ -1,3 +1,20 @@
+# -------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
+# Descripción de las clases importadas en este controlador
+# -------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
+
+#   Flask               Que es el framework
+#   render_template     Permite utilizar archivos HTML
+#   request             Para obtener los datos de la petición de un form
+#   redirect            Para hacer redirecciones
+#   url_for             Para hacer redirecciones
+#   flash               Manda mensajes entre vistas
+#   datetime            Para manejar fechas y horas
+#   bcrypt              Para encriptar/desemcriptar contrasaeñas
+#   sys                 Para obtener el tipo de excepción
+#   flask_sqlalchemy    ORM para SQL
+
 # Un modelo en Python es la clase que representa la tabla de la base de datos y su mapa de atributos por columna
 # Parámetros disponibles SQLAlchemy
 # 	Tipos de columna
@@ -33,7 +50,7 @@ from app import app  # El 1er app es el nombre del archivo app.py. El 2do "app" 
 from config import *
 from datetime import datetime
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, exc
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import Column, Integer, String, DateTime
 
@@ -66,21 +83,22 @@ class User(Base):
             User.email == email
         ).first()
 
-    def guardar(self):
+    def post(self):
         if not self.id:
             sessionDB.add(self)
         sessionDB.commit()
 
-    def actualizar(id, datos):
+    def put(id, datos):
         sessionDB.query(User).filter(User.id == id).update({
             User.nombre: datos['nombre'],
             User.email: datos['email'],
             User.contrasena: datos['contrasena']
         })
+        sessionDB.commit()
 
-
-
-
+    def delete(id):
+        sessionDB.query(User).filter(User.id == id).delete()
+        sessionDB.commit()
 
     def __str__(self):
         return self.email
@@ -106,12 +124,22 @@ class Contacto(Base):
             Contacto.email == email
         ).first()
 
-    def guardar(self):
+    def post(self):
         if not self.id:
             sessionDB.add(self)
         sessionDB.commit()
 
+    def put(id, datos):
+        sessionDB.query(Contacto).filter(Contacto.id == id).update({
+            Contacto.nombre: datos['nombre'],
+            Contacto.email: datos['email'],
+            Contacto.telefono: datos['telefono']
+        })
+        sessionDB.commit()
+
+    def delete(id):
+        sessionDB.query(Contacto).filter(Contacto.id == id).delete()
+        sessionDB.commit()
+
     def __str__(self):
         return self.email
-
-
