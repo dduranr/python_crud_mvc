@@ -20,6 +20,7 @@ from controladores.home import *
 from controladores.auth import *
 from controladores.users import *
 from controladores.contactos import *
+from controladores.testwtf import *
 
 # Si éste es el archivo que arranca a la app, entonces la ejecutamos
 #   1. Declaramos el puerto a usar

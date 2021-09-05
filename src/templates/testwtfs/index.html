@@ -1,0 +1,68 @@
+{% extends "layout.html" %}
+
+{% block contenido %}
+<div class="col-md-12">
+    {% with mensajesFlash = get_flashed_messages(with_categories=true) %}
+        {% if mensajesFlash %}
+            {% for categoria, mensaje in mensajesFlash %}
+                <div class="alert alert-{{ categoria }}" role="alert">
+                    {{ mensaje }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+
+    <div class="alert alert-primary">
+        <h2>Test WTF's</h2>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4">
+            <form action="/testwtf_post" method="POST">
+                <div class="form-row">
+                    <div class="form-group col-md-12">
+                        <label for="nombre">Nombre</label>
+                        <input type="text" class="form-control" id="nombre" name="nombre" value="Otro">
+                        <hr />
+                        {{ formulario.nombre.label() }}
+                        {{ formulario.nombre(class="form-control", value="Otro") }}
+                    </div>
+                    <div class="form-group col-md-12">
+                        <label for="email">Email</label>
+                        <input type="email" class="form-control" id="email" name="email" value="otro@gmail.com">
+                    </div>
+                </div>
+                <br>
+                <input type="submit" class="btn btn-primary" value="Agregar">
+                <!--
+                    Para evitar ataques CSRF generamos un token mediante la librería WTForms. Para que se genere, previamente debe estar declarada app.secret_key
+                -->
+                {{ formulario.hidden_tag() }}
+            </form>
+        </div>
+        <div class="col-md-8">
+            <table class="table table-s table-hover table-striped">
+                <thead>
+                    <th>ID</th>
+                    <th>NOMBRE</th>
+                    <th>EMAIL</th>
+                    <th></th>
+                    <th></th>
+                </thead>
+                <tbody>
+                    {% for testwtf in testwtfs %}
+                        <tr>
+                            <td>{{ testwtf['id'] }}</td>
+                            <td>{{ testwtf['nombre'] }}</td>
+                            <td>{{ testwtf['email'] }}</td>
+                            <td><a class="btn btn-success" href="/testwtf_update/{{ testwtf['id'] }}">Editar</a></td>
+                            <td><a class="btn btn-danger btn-delete" href="/testwtf_delete/{{ testwtf['id'] }}">Borrar</a></td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
