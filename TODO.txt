@@ -1,0 +1,7 @@
+SIGO CON
+SIGO CON
+SIGO CON
+
+			1. Ya quedó WTForms aplicado al módulo testwtf. Replicar lo hecho para auth, contactos y users
+			2. WTForms, probar: form = MiFormulario(request.POST, csrf_enabled=True)
+			3. Armar migraciones

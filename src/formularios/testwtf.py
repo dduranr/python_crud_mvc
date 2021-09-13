@@ -3,7 +3,7 @@ from wtforms import StringField, SubmitField
 from wtforms.validators import DataRequired, Email, Length
 
 class FormularioTestwtf(FlaskForm):
-	# Declaramos los futuros campos del formulario
+	# Cada variable representa un campo de formulario
 	nombre = StringField("Nombre", validators=[
 		DataRequired(),
 		Length(max=10, min=3)

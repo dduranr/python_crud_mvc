@@ -35,7 +35,7 @@ class Testwtf(Base):
     nombre = Column(String(255), nullable=False)
     email = Column(String(255), nullable=False, unique=True)
     created_at = Column(DateTime(255), default=datetime.now())
-    updated_at = Column(DateTime(255), onupdate=datetime.now())
+    updated_at = Column(DateTime(255), default=datetime.now(), onupdate=datetime.now())
 
     def getById(id):
         return sessionDB.query(Testwtf).filter(

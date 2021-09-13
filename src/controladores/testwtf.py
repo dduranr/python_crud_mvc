@@ -33,25 +33,23 @@ from modelos.testwtf import *
 
 @app.route('/testwtfs')
 def testwtfs():
-    # try:
-
+    try:
         formulario = FormularioTestwtf()
-
         usuarios = sessionDB.query(Testwtf).all()
         return render_template('testwtfs/index.html', testwtfs=usuarios, formulario=formulario)
 
-    # except exc.SQLAlchemyError as e:
-    #     error = "Excepción SQLAlchemyError: " + str(e)
-    #     return render_template('error.html', error="SQLAlchemyError: "+error)
-    # except TypeError as e:
-    #     error = "Excepción TypeError: " + str(e)
-    #     return render_template('error.html', error="TypeError: "+error)
-    # except ValueError as e:
-    #     error = "Excepción ValueError: " + str(e)
-    #     return render_template('error.html', error="ValueError: "+error)
-    # except Exception as e:
-    #     error = "Excepción general: " + str(e.__class__)
-    #     return render_template('error.html', error=error)
+    except exc.SQLAlchemyError as e:
+        error = "Excepción SQLAlchemyError: " + str(e)
+        return render_template('error.html', error="SQLAlchemyError: "+error)
+    except TypeError as e:
+        error = "Excepción TypeError: " + str(e)
+        return render_template('error.html', error="TypeError: "+error)
+    except ValueError as e:
+        error = "Excepción ValueError: " + str(e)
+        return render_template('error.html', error="ValueError: "+error)
+    except Exception as e:
+        error = "Excepción general: " + str(e.__class__)
+        return render_template('error.html', error=error)
 
 
 
@@ -59,25 +57,23 @@ def testwtfs():
 def testwtf_post():
     try:
         if request.method == 'POST':
-            now = datetime.now()
-            ahora = now.strftime("%Y-%m-%d %H:%M:%S")
+            formulario = FormularioTestwtf()
+            if formulario.validate_on_submit():
+                nombre = request.form['nombre']
+                email = request.form['email']
 
-            nombre = request.form['nombre']
-            email = request.form['email']
-            contrasena = request.form['contrasena']
-            contrasena_encode = contrasena.encode('utf-8')
-            contrasena_crypt = bcrypt.hashpw(contrasena_encode, semilla)
+                testwtfExistente = Testwtf.getByEmail(email)
 
-            testwtfExistente = Testwtf.getByEmail(email)
-
-            if testwtfExistente:
-                flash('Imposible crear usuario, pues '+email+' ya existe como usuario en base de datos', 'danger')
-                return redirect(url_for('testwtfs'))
-            else :
-                usuario = Testwtf(nombre=nombre, email=email, contrasena=contrasena_crypt)
-                usuario.post()
-
-                flash('Usuario agregado', 'success')
+                if testwtfExistente:
+                    flash('Imposible crear usuario, pues '+email+' ya existe como usuario en base de datos', 'danger')
+                    return redirect(url_for('testwtfs'))
+                else :
+                    usuario = Testwtf(nombre=nombre, email=email)
+                    usuario.post()
+                    flash('Usuario agregado', 'success')
+                    return redirect(url_for('testwtfs'))
+            else:
+                flash('Imposible crear testwtf. Algún dato es incorrecto', 'danger')
                 return redirect(url_for('testwtfs'))
 
     except exc.SQLAlchemyError as e:
@@ -98,36 +94,35 @@ def testwtf_post():
 @app.route('/testwtf_update/<id>', methods=['GET', 'POST'])
 def testwtf_update(id):
     try:
+        testwtf = Testwtf.getById(id)
         if (request.method == 'GET'):
-            testwtf = Testwtf.getById(id)
+            # Generamos el form y le pasamos los values de cada campo
+            formulario = FormularioTestwtf(request.form, nombre=testwtf.nombre, email=testwtf.email)
 
             if testwtf:
-                return render_template('testwtfs/update.html', testwtf=testwtf)
+                return render_template('testwtfs/update.html', testwtf=testwtf, formulario=formulario)
             else :
                 flash('Imposible encontrar al usuario', 'danger')
                 return redirect(url_for('testwtfs'))
         elif (request.method == 'POST'):
-            nombre = request.form['nombre']
-            email = request.form['email']
-            contrasena = request.form['contrasena']
+            formulario = FormularioTestwtf()
+            if formulario.validate_on_submit():
 
-            testwtfExistente = Testwtf.getById(id)
+                nombre = request.form['nombre']
+                email = request.form['email']
+                testwtfExistente = Testwtf.getById(id)
 
-            if not testwtfExistente:
-                flash('Imposible actualizar testwtf, pues el ID '+id+' no existe más en base de datos', 'danger')
-                return redirect(url_for('testwtfs'))
-            else :
-                if(len(contrasena) > 0):
-                    contrasena_encode = contrasena.encode('utf-8')
-                    contrasena_crypt = bcrypt.hashpw(contrasena_encode, semilla)
-                    dataToSave = {"nombre": nombre, "email": email, "contrasena": contrasena_crypt}
+                if not testwtfExistente:
+                    flash('Imposible actualizar testwtf, pues el ID '+id+' no existe más en base de datos', 'danger')
+                    return redirect(url_for('testwtfs'))
+                else :
+                    dataToSave = {"nombre": nombre, "email": email}
                     Testwtf.put(id, dataToSave)
-                else:
-                    dataToSave = {"nombre": nombre, "email": email, "contrasena": testwtfExistente.contrasena}
-                    Testwtf.put(id, dataToSave)
-
-            flash('Usuario actualizado', 'success')
-            return redirect(url_for('testwtfs'))
+                    flash('Usuario actualizado', 'success')
+                    return redirect(url_for('testwtfs'))
+            else:
+                flash('Imposible actualizar testwtf. Algún dato es incorrecto', 'danger')
+                return render_template('testwtfs/update.html', testwtf=testwtf, formulario=formulario)
 
     except exc.SQLAlchemyError as e:
         error = "Excepción SQLAlchemyError: " + str(e)

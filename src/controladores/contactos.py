@@ -64,7 +64,6 @@ def contacto_post():
             else :
                 contacto = Contacto(nombre=nombre, telefono=telefono, email=email)
                 contacto.post()
-
                 flash('Contacto agregado', 'success')
                 return redirect(url_for('contactos'))
 
@@ -107,9 +106,8 @@ def contacto_update(id):
             else :
                 dataToSave = {"nombre": nombre, "email": email, "telefono": telefono}
                 Contacto.put(id, dataToSave)
-
-            flash('Contacto actualizado', 'success')
-            return redirect(url_for('contactos'))
+                flash('Contacto actualizado', 'success')
+                return redirect(url_for('contactos'))
 
     except exc.SQLAlchemyError as e:
         error = "Excepción SQLAlchemyError: " + str(e)

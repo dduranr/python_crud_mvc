@@ -72,7 +72,6 @@ def user_post():
             else :
                 usuario = User(nombre=nombre, email=email, contrasena=contrasena_crypt)
                 usuario.post()
-
                 flash('Usuario agregado', 'success')
                 return redirect(url_for('users'))
 
@@ -121,9 +120,8 @@ def user_update(id):
                 else:
                     dataToSave = {"nombre": nombre, "email": email, "contrasena": userExistente.contrasena}
                     User.put(id, dataToSave)
-
-            flash('Usuario actualizado', 'success')
-            return redirect(url_for('users'))
+                    flash('Usuario actualizado', 'success')
+                    return redirect(url_for('users'))
 
     except exc.SQLAlchemyError as e:
         error = "Excepción SQLAlchemyError: " + str(e)
