@@ -18,6 +18,7 @@
 
 from app import app
 from flask import render_template, request, redirect, url_for, flash, session
+from formularios.auth import AuthFormLogin
 import bcrypt
 import sys
 
@@ -36,75 +37,81 @@ def login():
         if 'user_id' in session:
             return redirect(url_for('welcome'))
         else:
-            return render_template('login.html')
+            formulario = AuthFormLogin()
+            return render_template('back/auth/login.html', formulario=formulario)
 
     except TypeError as e:
         error = "Excepción TypeError: " + str(e)
-        return render_template('error.html', error="TypeError: "+error)
+        return render_template('back/errores/error.html', error="TypeError: "+error)
     except ValueError as e:
         error = "Excepción ValueError: " + str(e)
-        return render_template('error.html', error="ValueError: "+error)
+        return render_template('back/errores/error.html', error="ValueError: "+error)
     except Exception as e:
         error = "Excepción general: " + str(e.__class__)
-        return render_template('error.html', error=error)
+        return render_template('back/errores/error.html', error=error)
 
 
 
 @app.route('/acceso', methods=['POST'])
 def acceso():
     try:
-        email = request.form['email']
-        contrasena = request.form['contrasena']
-        contrasena_encode = contrasena.encode('utf-8')
+        formulario = AuthFormLogin()
+        if formulario.validate_on_submit():
+            email = request.form['email']
+            contrasena = request.form['contrasena']
+            contrasena_encode = contrasena.encode('utf-8')
 
-        usuario = User.getByEmail(email)
+            usuario = User.getByEmail(email)
 
-        if usuario:
-            bd_contrasena = usuario.contrasena
-            bd_contrasena = bd_contrasena.encode('utf-8')
+            if usuario:
+                bd_contrasena = usuario.contrasena
+                bd_contrasena = bd_contrasena.encode('utf-8')
 
-            # Si en la BD se guarda un texto cualquiera y no un hash (p.e. abc), el navegador devuelve: ValueError: Invalid salt
-            if(bcrypt.checkpw(contrasena_encode, bd_contrasena)):
-                session['user_id'] = usuario.id
-                session['user_nombre'] = usuario.nombre
-                session['user_email'] = usuario.email
-                return redirect(url_for('welcome'))
-            else:
+                # Si en la BD se guarda un texto cualquiera y no un hash (p.e. abc), el navegador devuelve: ValueError: Invalid salt
+                if(bcrypt.checkpw(contrasena_encode, bd_contrasena)):
+                    session['user_id'] = usuario.id
+                    session['user_nombre'] = usuario.nombre
+                    session['user_email'] = usuario.email
+                    return redirect(url_for('welcome'))
+                else:
+                    flash('Usuario/contraseña incorrectos', 'danger')
+                    return redirect(url_for('login'))
+            else :
                 flash('Usuario/contraseña incorrectos', 'danger')
                 return redirect(url_for('login'))
-        else :
-            flash('Usuario/contraseña incorrectos', 'danger')
-            return redirect(url_for('login'))
+        else:
+            flash('Imposible crear sesión. Algún dato es incorrecto', 'danger')
+            return render_template('back/auth/login.html', formulario=formulario)
 
     except exc.SQLAlchemyError as e:
         error = "Excepción SQLAlchemyError: " + str(e)
-        return render_template('error.html', error="SQLAlchemyError: "+error)
+        return render_template('back/errores/error.html', error="SQLAlchemyError: "+error)
     except TypeError as e:
         error = "Excepción TypeError: " + str(e)
-        return render_template('error.html', error="TypeError: "+error)
+        return render_template('back/errores/error.html', error="TypeError: "+error)
     except ValueError as e:
         error = "Excepción ValueError: " + str(e)
-        return render_template('error.html', error="ValueError: "+error)
+        return render_template('back/errores/error.html', error="ValueError: "+error)
     except Exception as e:
         error = "Excepción general: " + str(e.__class__)
-        return render_template('error.html', error=error)
+        return render_template('back/errores/error.html', error=error)
 
 
 
 @app.route('/welcome')
 def welcome():
     try:
-        return render_template('welcome.html')
+        return render_template('back/auth/welcome.html')
 
     except TypeError as e:
         error = "Excepción TypeError: " + str(e)
-        return render_template('error.html', error="TypeError: "+error)
+        return render_template('back/errores/error.html', error="TypeError: "+error)
     except ValueError as e:
         error = "Excepción ValueError: " + str(e)
-        return render_template('error.html', error="ValueError: "+error)
+        return render_template('back/errores/error.html', error="ValueError: "+error)
     except Exception as e:
         error = "Excepción general: " + str(e.__class__)
-        return render_template('error.html', error=error)
+        return render_template('back/errores/error.html', error=error)
 
 
 
@@ -116,10 +123,10 @@ def logout():
 
     except TypeError as e:
         error = "Excepción TypeError: " + str(e)
-        return render_template('error.html', error="TypeError: "+error)
+        return render_template('back/errores/error.html', error="TypeError: "+error)
     except ValueError as e:
         error = "Excepción ValueError: " + str(e)
-        return render_template('error.html', error="ValueError: "+error)
+        return render_template('back/errores/error.html', error="ValueError: "+error)
     except Exception as e:
         error = "Excepción general: " + str(e.__class__)
-        return render_template('error.html', error=error)
+        return render_template('back/errores/error.html', error=error)

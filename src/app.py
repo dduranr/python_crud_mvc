@@ -16,11 +16,13 @@ from config import *
 app = Flask(__name__)
 
 # Importamos los controladores después de declarar la variable "app", ya que el controlador lo usa para las rutas
-from controladores.home import *
-from controladores.auth import *
-from controladores.users import *
-from controladores.contactos import *
-from controladores.testwtf import *
+# Backend
+from controladores.back.auth import *
+from controladores.back.users import *
+from controladores.back.contactos import *
+from controladores.back.testwtf import *
+# Frontend
+from controladores.front.home import *
 
 # Si éste es el archivo que arranca a la app, entonces la ejecutamos
 #   1. Declaramos el puerto a usar

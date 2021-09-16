@@ -36,20 +36,20 @@ def testwtfs():
     try:
         formulario = FormularioTestwtf()
         usuarios = sessionDB.query(Testwtf).all()
-        return render_template('testwtfs/index.html', testwtfs=usuarios, formulario=formulario)
+        return render_template('back/testwtfs/index.html', testwtfs=usuarios, formulario=formulario)
 
     except exc.SQLAlchemyError as e:
         error = "Excepción SQLAlchemyError: " + str(e)
-        return render_template('error.html', error="SQLAlchemyError: "+error)
+        return render_template('back/errores/error.html', error="SQLAlchemyError: "+error)
     except TypeError as e:
         error = "Excepción TypeError: " + str(e)
-        return render_template('error.html', error="TypeError: "+error)
+        return render_template('back/errores/error.html', error="TypeError: "+error)
     except ValueError as e:
         error = "Excepción ValueError: " + str(e)
-        return render_template('error.html', error="ValueError: "+error)
+        return render_template('back/errores/error.html', error="ValueError: "+error)
     except Exception as e:
         error = "Excepción general: " + str(e.__class__)
-        return render_template('error.html', error=error)
+        return render_template('back/errores/error.html', error=error)
 
 
 
@@ -78,16 +78,16 @@ def testwtf_post():
 
     except exc.SQLAlchemyError as e:
         error = "Excepción SQLAlchemyError: " + str(e)
-        return render_template('error.html', error="SQLAlchemyError: "+error)
+        return render_template('back/errores/error.html', error="SQLAlchemyError: "+error)
     except TypeError as e:
         error = "Excepción TypeError: " + str(e)
-        return render_template('error.html', error="TypeError: "+error)
+        return render_template('back/errores/error.html', error="TypeError: "+error)
     except ValueError as e:
         error = "Excepción ValueError: " + str(e)
-        return render_template('error.html', error="ValueError: "+error)
+        return render_template('back/errores/error.html', error="ValueError: "+error)
     except Exception as e:
         error = "Excepción general: " + str(e.__class__)
-        return render_template('error.html', error=error)
+        return render_template('back/errores/error.html', error=error)
 
 
 
@@ -100,7 +100,7 @@ def testwtf_update(id):
             formulario = FormularioTestwtf(request.form, nombre=testwtf.nombre, email=testwtf.email)
 
             if testwtf:
-                return render_template('testwtfs/update.html', testwtf=testwtf, formulario=formulario)
+                return render_template('back/testwtfs/update.html', testwtf=testwtf, formulario=formulario)
             else :
                 flash('Imposible encontrar al usuario', 'danger')
                 return redirect(url_for('testwtfs'))
@@ -122,20 +122,20 @@ def testwtf_update(id):
                     return redirect(url_for('testwtfs'))
             else:
                 flash('Imposible actualizar testwtf. Algún dato es incorrecto', 'danger')
-                return render_template('testwtfs/update.html', testwtf=testwtf, formulario=formulario)
+                return render_template('back/testwtfs/update.html', testwtf=testwtf, formulario=formulario)
 
     except exc.SQLAlchemyError as e:
         error = "Excepción SQLAlchemyError: " + str(e)
-        return render_template('error.html', error="SQLAlchemyError: "+error)
+        return render_template('back/errores/error.html', error="SQLAlchemyError: "+error)
     except TypeError as e:
         error = "Excepción TypeError: " + str(e)
-        return render_template('error.html', error="TypeError: "+error)
+        return render_template('back/errores/error.html', error="TypeError: "+error)
     except ValueError as e:
         error = "Excepción ValueError: " + str(e)
-        return render_template('error.html', error="ValueError: "+error)
+        return render_template('back/errores/error.html', error="ValueError: "+error)
     except Exception as e:
         error = "Excepción general: " + str(e.__class__)
-        return render_template('error.html', error=error)
+        return render_template('back/errores/error.html', error=error)
 
 
 
@@ -155,13 +155,13 @@ def testwtf_delete(id):
 
     except exc.SQLAlchemyError as e:
         error = "Excepción SQLAlchemyError: " + str(e)
-        return render_template('error.html', error="SQLAlchemyError: "+error)
+        return render_template('back/errores/error.html', error="SQLAlchemyError: "+error)
     except TypeError as e:
         error = "Excepción TypeError: " + str(e)
-        return render_template('error.html', error="TypeError: "+error)
+        return render_template('back/errores/error.html', error="TypeError: "+error)
     except ValueError as e:
         error = "Excepción ValueError: " + str(e)
-        return render_template('error.html', error="ValueError: "+error)
+        return render_template('back/errores/error.html', error="ValueError: "+error)
     except Exception as e:
         error = "Excepción general: " + str(e.__class__)
-        return render_template('error.html', error=error)
+        return render_template('back/errores/error.html', error=error)
