@@ -49,7 +49,7 @@ def contactos():
 
 @app.route('/contacto_post', methods=['POST'])
 def contacto_post():
-    # try:
+    try:
         if request.method == 'POST':
             contactos = sessionDB.query(Contacto).all()
             formulario = ContactoFormPost()
@@ -75,18 +75,18 @@ def contacto_post():
                 flash('Imposible crear contacto. Algún dato es incorrecto', 'danger')
                 return render_template('back/contactos/index.html', contactos=contactos, formulario=formulario)
 
-    # except exc.SQLAlchemyError as e:
-    #     error = "Excepción SQLAlchemyError: " + str(e)
-    #     return render_template('back/errores/error.html', error="SQLAlchemyError: "+error)
-    # except TypeError as e:
-    #     error = "Excepción TypeError: " + str(e)
-    #     return render_template('back/errores/error.html', error="TypeError: "+error)
-    # except ValueError as e:
-    #     error = "Excepción ValueError: " + str(e)
-    #     return render_template('back/errores/error.html', error="ValueError: "+error)
-    # except Exception as e:
-    #     error = "Excepción general: " + str(e.__class__)
-    #     return render_template('back/errores/error.html', error=error)
+    except exc.SQLAlchemyError as e:
+        error = "Excepción SQLAlchemyError: " + str(e)
+        return render_template('back/errores/error.html', error="SQLAlchemyError: "+error)
+    except TypeError as e:
+        error = "Excepción TypeError: " + str(e)
+        return render_template('back/errores/error.html', error="TypeError: "+error)
+    except ValueError as e:
+        error = "Excepción ValueError: " + str(e)
+        return render_template('back/errores/error.html', error="ValueError: "+error)
+    except Exception as e:
+        error = "Excepción general: " + str(e.__class__)
+        return render_template('back/errores/error.html', error=error)
 
 
 
@@ -96,11 +96,11 @@ def contacto_update(id):
         contacto = Contacto.getById(id)
         if (request.method == 'GET'):
             # Generamos el form y le pasamos los values de cada campo
-            formulario = ContactoFormUpdate(request.form, nombre=user.nombre, telefono=user.telefono, email=user.email)
+            formulario = ContactoFormUpdate(request.form, nombre=contacto.nombre, telefono=contacto.telefono, email=contacto.email)
 
             if contacto:
                 return render_template('back/contactos/update.html', contacto=contacto, formulario=formulario)
-            else :
+            else:
                 flash('Imposible encontrar el contacto', 'danger')
                 return redirect(url_for('contactos'))
         elif (request.method == 'POST'):
