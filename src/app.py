@@ -23,7 +23,6 @@ app = Flask(__name__)
 from controladores.back.auth import *
 from controladores.back.users import *
 from controladores.back.contactos import *
-from controladores.back.testwtf import *
 # Frontend
 from controladores.front.home import *
 
