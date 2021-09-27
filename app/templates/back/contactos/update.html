@@ -1,0 +1,56 @@
+<!--
+    Se llaman algunas funciones Bootstrap para renderizar los campos de este formulario.
+    A excepción del presente, todos los formularios de este proyecto no se renderizan con funciones Bootstrap. En el presente formulario sí se hace porque así lo marcaba el tutorial seguido para armar el campo de teléfono:
+        1. https://www.twilio.com/blog/a-phone-number-input-field-for-flask-forms
+        2. https://github.com/miguelgrinberg/flask-phone-input
+-->
+
+{% extends "back/layout/layout.html" %}
+{% from 'bootstrap/form.html' import render_field, render_hidden_errors %}
+
+{% block contenido %}
+<div class="col-md-12">
+    {% with mensajesFlash = get_flashed_messages(with_categories=true) %}
+        {% if mensajesFlash %}
+            {% for categoria, mensaje in mensajesFlash %}
+                <div class="alert alert-{{ categoria }}" role="alert">
+                    {{ mensaje }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <div class="alert alert-primary">
+        <h2>Editando contacto</h2>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <form action="/contacto_update/{{ contacto['id'] }}" method="POST">
+                <div class="form-row">
+                    <div class="text-danger">
+                        {{ render_hidden_errors(formulario) }}
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group col-md-12">
+                        {{ render_field(formulario.nombre) }}
+                    </div>
+                    <div class="form-group col-md-12">
+                        {{ render_field(formulario.telefono) }}
+                    </div>
+                    <div class="form-group col-md-12">
+                        {{ render_field(formulario.email) }}
+                    </div>
+                </div>
+                <br>
+                {{ render_field(formulario.submit) }}
+                <!--
+                    Para evitar ataques CSRF generamos un token mediante la librería WTForms. Para que se genere, previamente debe estar declarada app.secret_key
+                -->
+                {{ formulario.hidden_tag() }}
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
